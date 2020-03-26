@@ -10,6 +10,16 @@ USER root
 RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 7638D0442B90D010
 RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 04EE7237B7D453EC
 RUN apt-get install ca-certificates
+
+RUN apt-get update
+RUN apt install -y software-properties-common
+RUN apt-get update
+RUN add-apt-repository ppa:openjdk-r/ppa
+#RUN apt-add-repository ppa:webupd8team/java
+RUN apt-get update
+RUN apt-get install -qy openjdk-8-jdk
+#RUN apt-get install -qy oracle-java8-installer
+
 RUN groupadd -g ${gid} ${group}
 RUN useradd -c "Jenkins user" -d /home/${user} -u ${uid} -g ${gid} -m ${user}
 LABEL Description="This is a base image, which provides the Jenkins agent executable (agent.jar)" Vendor="Jenkins project" Version="${VERSION}"
