@@ -1,0 +1,4 @@
+FROM  jenkins/jnlp-slave:latest
+FROM  selenium/standalone-chrome-debug:latest
+
+COPY . .
