@@ -3,26 +3,56 @@ FROM  selenium/standalone-chrome-debug:latest
 ARG VERSION=4.0.1
 ARG user=jenkins
 ARG group=jenkins
-ARG uid=1000
+ARG uid=1001
 ARG gid=1001
+
+USER root
+RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 7638D0442B90D010
+RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 04EE7237B7D453EC
+RUN apt-get install ca-certificates
+
+RUN apt-get update
+RUN apt install -y software-properties-common
+RUN apt-get update
+RUN add-apt-repository ppa:openjdk-r/ppa
+RUN apt-get update
+RUN apt-get install -qy openjdk-8-jdk
+
 
 RUN groupadd -g ${gid} ${group}
 RUN useradd -c "Jenkins user" -d /home/${user} -u ${uid} -g ${gid} -m ${user}
+RUN echo "jenkins:jenkins" | chpasswd && \
+    mkdir /home/jenkins/.m2
 LABEL Description="This is a base image, which provides the Jenkins agent executable (agent.jar)" Vendor="Jenkins project" Version="${VERSION}"
 
 ARG AGENT_WORKDIR=/home/${user}/agent
 
 RUN echo 'deb http://deb.debian.org/debian stretch-backports main' > /etc/apt/sources.list.d/stretch-backports.list
-RUN apt-get update && apt-get install -t stretch-backports git-lfs && rm -rf /var/lib/apt/lists/*
-RUN curl --create-dirs -fsSLo /usr/share/jenkins/agent.jar https://repo.jenkins-ci.org/public/org/jenkins-ci/main/remoting/${VERSION}/remoting-${VERSION}.jar \
+RUN apt-get update && apt-get install -y -t stretch-backports git-lfs && rm -rf /var/lib/apt/lists/*
+RUN curl --insecure --create-dirs -fsSLo /usr/share/jenkins/agent.jar https://repo.jenkins-ci.org/public/org/jenkins-ci/main/remoting/${VERSION}/remoting-${VERSION}.jar \
   && chmod 755 /usr/share/jenkins \
   && chmod 644 /usr/share/jenkins/agent.jar \
   && ln -sf /usr/share/jenkins/agent.jar /usr/share/jenkins/slave.jar
+
+RUN apt-get update && \
+    apt-get -qy full-upgrade && \
+    apt-get install -qy git && \
+    apt-get install -qy openssh-server && \
+    sed -i 's|session    required     pam_loginuid.so|session    optional     pam_loginuid.so|g' /etc/pam.d/sshd && \
+    mkdir -p /var/run/sshd
+
+COPY .ssh/authorized_keys /home/jenkins/.ssh/authorized_keys
+RUN chown -R jenkins:jenkins /home/jenkins/.m2/ && \
+    chown -R jenkins:jenkins /home/jenkins/.ssh/
 
 USER ${user}
 ENV AGENT_WORKDIR=${AGENT_WORKDIR}
 RUN mkdir /home/${user}/.jenkins && mkdir -p ${AGENT_WORKDIR}
 
+
 VOLUME /home/${user}/.jenkins
 VOLUME ${AGENT_WORKDIR}
 WORKDIR /home/${user}
+
+CMD ["/opt/bin/entry_point.sh"]
+RUN /opt/bin/generate_config > /opt/selenium/config.json
