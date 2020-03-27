@@ -42,3 +42,4 @@ VOLUME ${AGENT_WORKDIR}
 WORKDIR /home/${user}
 
 CMD ["/opt/bin/entry_point.sh"]
+RUN /opt/bin/generate_config > /opt/selenium/config.json
