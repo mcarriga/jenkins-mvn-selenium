@@ -21,9 +21,6 @@ RUN apt-get install -qy openjdk-8-jdk
 
 RUN groupadd -g ${gid} ${group}
 RUN useradd -c "Jenkins user" -d /home/${user} -u ${uid} -g ${gid} -m ${user}
-RUN echo "jenkins:jenkins" | chpasswd && \
-    mkdir /home/jenkins/.m2
-LABEL Description="This is a base image, which provides the Jenkins agent executable (agent.jar)" Vendor="Jenkins project" Version="${VERSION}"
 
 ARG AGENT_WORKDIR=/home/${user}/agent
 
@@ -33,17 +30,6 @@ RUN curl --insecure --create-dirs -fsSLo /usr/share/jenkins/agent.jar https://re
   && chmod 755 /usr/share/jenkins \
   && chmod 644 /usr/share/jenkins/agent.jar \
   && ln -sf /usr/share/jenkins/agent.jar /usr/share/jenkins/slave.jar
-
-RUN apt-get update && \
-    apt-get -qy full-upgrade && \
-    apt-get install -qy git && \
-    apt-get install -qy openssh-server && \
-    sed -i 's|session    required     pam_loginuid.so|session    optional     pam_loginuid.so|g' /etc/pam.d/sshd && \
-    mkdir -p /var/run/sshd
-
-COPY .ssh/authorized_keys /home/jenkins/.ssh/authorized_keys
-RUN chown -R jenkins:jenkins /home/jenkins/.m2/ && \
-    chown -R jenkins:jenkins /home/jenkins/.ssh/
 
 USER ${user}
 ENV AGENT_WORKDIR=${AGENT_WORKDIR}
