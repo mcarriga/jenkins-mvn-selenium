@@ -43,7 +43,7 @@ RUN curl --insecure --create-dirs -fsSLo /usr/share/jenkins/agent.jar https://re
   && ln -sf /usr/share/jenkins/agent.jar /usr/share/jenkins/slave.jar
 
 COPY setup-sshd /usr/local/bin/setup-sshd
-RUN chown Jenkins /usr/local/bin/setup-sshd
+RUN chown jenkins /usr/local/bin/setup-sshd
 RUN chmod +x /usr/local/bin/setup-sshd
 
 USER ${user}
