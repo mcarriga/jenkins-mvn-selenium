@@ -46,6 +46,8 @@ RUN sed -i /etc/ssh/sshd_config \
     mkdir /var/run/sshd
 
 ENV JAVA_HOME /usr/local/openjdk-8
+ENV PATH="/usr/local/bin/:${PATH}"
+ENV PATH="usr/local/openjdk-8:${PATH}"
 
 VOLUME "${JENKINS_AGENT_HOME}" "/tmp" "/run" "/var/run"
 WORKDIR "${JENKINS_AGENT_HOME}"
