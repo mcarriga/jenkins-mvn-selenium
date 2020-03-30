@@ -48,5 +48,10 @@ VOLUME /home/${user}/.jenkins
 VOLUME ${AGENT_WORKDIR}
 WORKDIR /home/${user}
 
+# Standard SSH port
+EXPOSE 22
+
+CMD ["/usr/sbin/sshd", "-D"]
+
 CMD ["/opt/bin/entry_point.sh"]
 RUN /opt/bin/generate_config > /opt/selenium/config.json
